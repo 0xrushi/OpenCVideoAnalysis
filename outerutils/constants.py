@@ -9,6 +9,10 @@ GENDER_PROTO = 'weights/gender_net.caffemodel'
 # Each Caffe Model impose the shape of the input image also image preprocessing is required like mean
 # substraction to eliminate the effect of illunination changes
 MODEL_MEAN_VALUES = (78.4263377603, 87.7689143744, 114.895847746)
+
+# Race Ethnicity model: https://sefiks.com/2019/11/11/race-and-ethnicity-prediction-in-keras/, https://drive.google.com/file/d/1nz-WDhghGQBC4biwShQ9kYjvQMpO6smj/view
+RACE_MODEL = 'weights/race_model_single_batch.h5'
+
 # Represent the gender classes
 GENDER_LIST = ['Male', 'Female']
 # Initialize frame size

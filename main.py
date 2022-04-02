@@ -3,9 +3,14 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
+
+import sys
+sys.path.insert(0, '/mnt/hdd2/gender_detect/yoloface/')
+
 from face_detector import YoloDetector
 import cv2
 from outerutils.constants import *
+
 
 # Load gender prediction model
 gender_net = cv2.dnn.readNetFromCaffe(GENDER_MODEL, GENDER_PROTO)
@@ -85,6 +90,7 @@ orgimg = np.array(Image.open('frames_saved/frame240.jpg')).astype(np.uint8)
 print(orgimg.shape)
 bboxes, points = model.predict(orgimg)
 print(bboxes)
+JUST_SAVE_BOUNDING_BOXES = True
 
 # iterate through all the faces
 for c in bboxes[0]:
@@ -97,15 +103,21 @@ for c in bboxes[0]:
     cv2.rectangle(orgimg,(x1,y1),(x2,y2),(0,255,0),2)
     # keep in mind index become reversed during cropping
     face = orgimg[y1:y2, x1:x2]
+    
     custom_plot(face)
-    gender_label = predict_gender(face)
-    age_label = predict_age(face)
-    labeltext = f"Person  {gender_label} \n {age_label}"
-    y0, dy = y2+20, 22
-    # The loop below is to put text one below other, we cannot use \n directly| change y0 and dy as per your screen size
-    for i, line in enumerate(labeltext.split('\n')):
-        y = y0 + i*dy
-        cv2.putText(orgimg, line, (x1+10, y), 1, 1.8, (0,255,0))
 
-    custom_plot(orgimg)
+    if not JUST_SAVE_BOUNDING_BOXES:
+        custom_plot(face)
+        # apply gender prediction
+        gender_label = predict_gender(face)
+        # apply age prediction
+        age_label = predict_age(face)
+        labeltext = f"Person  {gender_label} \n {age_label}"
+        y0, dy = y2+20, 22
+        # The loop below is to put text one below other, we cannot use \n directly| change y0 and dy as per your screen size
+        for i, line in enumerate(labeltext.split('\n')):
+            y = y0 + i*dy
+            cv2.putText(orgimg, line, (x1+10, y), 1, 1.8, (0,255,0))
+
+        custom_plot(orgimg)
 
