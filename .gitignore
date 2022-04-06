@@ -6,3 +6,6 @@ just_yolo_frames/*
 frames_saved/*
 4433.zip
 faces.zip
+PyVGGFace/venv/*
+just_yolo_frames2/*
+just_yolo_frames/*

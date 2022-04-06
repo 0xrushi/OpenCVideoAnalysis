@@ -178,7 +178,11 @@ IMAGES_PATH = '/mnt/hdd2/gender_detect/just_yolo_frames/19288/unique'
 db = Database(IMAGES_PATH)
 df = pd.DataFrame(columns = ["frameid", "timestamp", "bbloc", "img_path", "name"])
 
-run_on_video('19288/1524962.mp4', db, df)
+# run_on_video('19288/1524962.mp4', db, df)
+videos_list = glob.glob('19288/*.mp4')[:4]
+print(videos_list)
+for video in videos_list:
+    run_on_video(video, db, df)
 
 # print(db.get().keys())
 # print(df)

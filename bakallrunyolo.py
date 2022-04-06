@@ -1,7 +1,6 @@
 import os
 from tkinter import Y
 import torch
-import torch.nn.functional as F
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -62,15 +61,15 @@ class Database:
         for filename in glob.glob(os.path.join(IMAGES_PATH, '*.png')):
             # load image
             print(filename)
-            image_rgb = Image.open(filename)
+            image_rgb = face_recognition.load_image_file(filename)
 
             # use the name in the filename as the identity key
             identity = os.path.splitext(os.path.basename(filename))[0]
 
             # get the face encoding and link it to the identity
-            # encodings = self.get_face_embeddings_from_image(image_rgb)
+            encodings = self.get_face_embeddings_from_image(image_rgb)
             
-            self.database[identity] = filename
+            self.database[identity] = encodings
             
     def get_face_embeddings_from_image(self, image, convert_to_rgb=False):
         """
@@ -88,8 +87,8 @@ class Database:
         if frame is None:
             frame = np.asarray(Image.open(img_path))
         # get the face encoding and link it to the identity
-        # encodings = self.get_face_embeddings_from_image(frame)
-        self.database[identity] = img_path
+        encodings = self.get_face_embeddings_from_image(frame)
+        self.database[identity] = encodings
     def get(self):
         return self.database
 
@@ -182,10 +181,9 @@ def run_on_frame(db, frame, video_name, frameid, df, timestamp):
     img_path = 'just_yolo_frames/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid)
     pp, name = None, ""
     # the face_recognitino library uses keys and values of your database separately
-    known_face_image_files = list(db.database.values())
-    # print('known_face_image_files ', known_face_image_files)
+    known_face_encodings = list(db.database.values())
+    print('known_face_encodings ', known_face_encodings)
     known_face_names = list(db.database.keys())
-    print(f"known_face_names {known_face_names}")
 
     # iterate through all the faces
     for bbox in bboxes[0]:
@@ -199,31 +197,23 @@ def run_on_frame(db, frame, video_name, frameid, df, timestamp):
         # keep in mind index become reversed during cropping
         face = orgimg[y1:y2, x1:x2].copy()
         
-        img0 = preprocess_siamese(face)
-        if len(known_face_image_files)<1:
-            known_face_image_files.append(img_path)
-            known_face_names.append(os.path.splitext(os.path.basename(img_path))[0])
+        # run detection and embedding models
+        face_encoding = db.get_face_embeddings_from_image(face, convert_to_rgb=True)
+        # print('face_encoding', face_encoding)
+        distances = face_recognition.face_distance(known_face_encodings, face_encoding)
+        print(f"distances is {distances}")
+        if np.any(distances <= MAX_DISTANCE):
+            best_match_idx = np.argmin([distances], axis =1)[0]
+            print('best_match_idx', best_match_idx)
+            name = known_face_names[best_match_idx]
+        else:
+            name = None
             db.insert(img_path, face)
-            cv2.imwrite('./just_yolo_frames/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid), face)
-        for i, img1_filename in enumerate(known_face_image_files):
-            img1 = preprocess_siamese(np.asarray(Image.open(img1_filename)))
-            output1, output2 = siamese_model(img0, img1)
-            # output1 = round(float(output1), 2)
-            # output2 = round(float(output2), 2)
-            distance = F.pairwise_distance(output1, output2)[0]
-            print(f"distanbce is {distance}")
-            if distance < 1.7:
-                name = known_face_names[i]
-                break
-            else:
-                name = None
-                db.insert(img_path, face)
-                
+        # put recognition info on the image
         pp  = paint_detected_face_on_image(orgimg, bbox, name)
         if pp is not None:
             print('just_yolo_frames/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid))
             cv2.imwrite('./just_yolo_frames/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid), face)
-            cv2.imwrite('./just_yolo_frames2/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid), orgimg)
         print(f"name is {name}")
         df.loc[len(df)] = [frameid, round(timestamp, 2), bbox, img_path, name]
 
@@ -242,22 +232,15 @@ def run_on_frame(db, frame, video_name, frameid, df, timestamp):
 
             # custom_plot(orgimg)
 
-def run_on_video(video_name, df):
+def run_on_video(video_name, db, df):
     cap = cv2.VideoCapture(video_name)
     count = 0
-    FRAME_SKIP = 5
+    FRAME_SKIP = 10
 
     SAVE_PATH = 'just_yolo_frames/{0}'.format(os.path.splitext(video_name)[0])
-    SAVE_PATH2 = 'just_yolo_frames2/{0}'.format(os.path.splitext(video_name)[0])
-
-    db = Database(IMAGES_PATH)
-
-
     # create save path if doesn't exist
     if not os.path.exists(SAVE_PATH):
         os.makedirs(SAVE_PATH)
-    if not os.path.exists(SAVE_PATH2):
-        os.makedirs(SAVE_PATH2)
 
     while cap.isOpened():
         ret, frame = cap.read()
@@ -274,10 +257,11 @@ def run_on_video(video_name, df):
 
 # path for initial images in the databases, images here should be unique
 IMAGES_PATH = '/mnt/hdd2/gender_detect/unique'
+db = Database(IMAGES_PATH)
 df = pd.DataFrame(columns = ["frameid", "timestamp", "bbloc", "img_path", "name"])
 
-# videos_list = ['19288/1524962.mp4']
-videos_list = glob.glob('19288/*.mp4')[5:10]
+# run_on_video('19288/1524962.mp4')
+videos_list = glob.glob('19288/*.mp4')[:4]
 print(videos_list)
 for video in videos_list:
-    run_on_video(video, df)
+    run_on_video(video, db, df)
