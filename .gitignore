@@ -8,4 +8,5 @@ frames_saved/*
 faces.zip
 PyVGGFace/venv/*
 just_yolo_frames2/*
-just_yolo_frames/*
+face.evoLVe/disp/*
+PyVGGFace/*.png
