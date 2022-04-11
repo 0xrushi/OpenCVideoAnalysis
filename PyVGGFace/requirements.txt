@@ -1,5 +1,0 @@
-torch
-torchfile
-urllib3
-opencv-python
-ipython
