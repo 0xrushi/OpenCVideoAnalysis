@@ -6,12 +6,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 import glob
-import sys
-sys.path.insert(0, '/mnt/hdd2/gender_detect/yoloface/')
-
-from face_detector import YoloDetector
-import cv2
 from outerutils.constants import *
+import sys
+sys.path.insert(0, f'{ROOT_FOLDER}/yoloface/')
+from face_detector import YoloDetector
+
+import cv2
 import pandas as pd
 import face_recognition
 from PyVGGFace.lib import VGGFace
@@ -169,7 +169,7 @@ def predict_age(face_img):
     label = f"Age: {age}-{age_confidence_score*100:.1f}%"
     return label
 
-model = YoloDetector(target_size=720,gpu=0,min_face=90)
+model = YoloDetector(target_size=720, gpu=1, min_face=90)
 
 
 def run_on_frame(db, frame, video_name, frameid, df, timestamp):

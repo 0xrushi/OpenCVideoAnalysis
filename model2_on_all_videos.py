@@ -4,8 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 import sys
-# sys.path.insert(0, '/mnt/hdd2/gender_detect/yoloface/')
-sys.path.insert(0, '/mnt/hdd2/gender_detect/face.evoLVe/applications/align')
+from outerutils.constants import *
+sys.path.insert(0, f'{ROOT_FOLDER}/face.evoLVe/applications/align')
 
 from detector import detect_faces
 from visualization_utils import show_results
@@ -174,7 +174,7 @@ def run_on_video(video_name, db, df):
             break
 
 # path for initial images in the databases, images here should be unique
-IMAGES_PATH = '/mnt/hdd2/gender_detect/just_yolo_frames/19288/unique'
+IMAGES_PATH = f'{ROOT_FOLDER}/just_yolo_frames/19288/unique'
 db = Database(IMAGES_PATH)
 df = pd.DataFrame(columns = ["frameid", "timestamp", "bbloc", "img_path", "name"])
 

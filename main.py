@@ -3,14 +3,12 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
-
-import sys
-sys.path.insert(0, '/mnt/hdd2/gender_detect/yoloface/')
-
-from face_detector import YoloDetector
 import cv2
-from outerutils.constants import *
 
+from outerutils.constants import *
+import sys
+sys.path.insert(0, f'{ROOT_FOLDER}/yoloface/')
+from face_detector import YoloDetector
 
 # Load gender prediction model
 gender_net = cv2.dnn.readNetFromCaffe(GENDER_MODEL, GENDER_PROTO)
