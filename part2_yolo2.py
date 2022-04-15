@@ -277,7 +277,7 @@ IMAGES_PATH = '/mnt/hdd2/gender_detect/unique'
 df = pd.DataFrame(columns = ["frameid", "timestamp", "bbloc", "img_path", "name"])
 
 # videos_list = ['19288/1524962.mp4']
-videos_list = glob.glob('19288/*.mp4')[0:20]
+videos_list = glob.glob('19288/*.mp4')[20:40]
 print(videos_list)
 for video in videos_list:
     run_on_video(video, df)

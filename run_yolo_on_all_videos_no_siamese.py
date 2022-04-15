@@ -16,6 +16,7 @@ import pandas as pd
 import face_recognition
 from PyVGGFace.lib import VGGFace
 from SiameseNet.model import SiameseNetwork, preprocess_siamese
+from race_model.model import get_race_model
 
 class VGFace:
     def __init__(self):
@@ -53,53 +54,15 @@ def paint_detected_face_on_image(frame, location, name=None):
     cv2.rectangle(frame, (left, bottom - 35), (right, bottom), color, cv2.FILLED)
     cv2.putText(frame, name, (left + 6, bottom - 6), cv2.FONT_HERSHEY_DUPLEX, 1.0, (255, 255, 255), 1)
     return frame
-class Database:
-    def __init__(self, IMAGES_PATH=None):
-        self.database = {}
-        self.IMAGES_PATH = IMAGES_PATH
-        self.vgg_face = VGFace()
 
-        for filename in glob.glob(os.path.join(IMAGES_PATH, '*.png')):
-            # load image
-            print(filename)
-            image_rgb = Image.open(filename)
-
-            # use the name in the filename as the identity key
-            identity = os.path.splitext(os.path.basename(filename))[0]
-
-            # get the face encoding and link it to the identity
-            # encodings = self.get_face_embeddings_from_image(image_rgb)
-            
-            self.database[identity] = filename
-            
-    def get_face_embeddings_from_image(self, image, convert_to_rgb=False):
-        """
-        Take a raw image and run both the face detection and face embedding model on it
-        """
-        # Convert from BGR to RGB if needed
-        if convert_to_rgb:
-            image = image[:, :, ::-1]
-
-        return self.vgg_face.get_encoding(image).detach().numpy()[0]
-    
-    def insert(self, img_path, frame=None):
-        # get filename without pre path and extension
-        identity = os.path.splitext(os.path.basename(img_path))[0]
-        if frame is None:
-            frame = np.asarray(Image.open(img_path))
-        # get the face encoding and link it to the identity
-        # encodings = self.get_face_embeddings_from_image(frame)
-        self.database[identity] = img_path
-    def get(self):
-        return self.database
-
+# load VFF face model
+vgg_face = VGFace()
 # Load gender prediction model
 gender_net = cv2.dnn.readNetFromCaffe(GENDER_MODEL, GENDER_PROTO)
 # Load age prediction model
 age_net = cv2.dnn.readNetFromCaffe(AGE_MODEL, AGE_PROTO)
-
-siamese_model = SiameseNetwork()
-siamese_model.load_state_dict(torch.load('weights/siamese_net.pt'))
+# load race model
+race_net  = get_race_model()
 
 # from: https://stackoverflow.com/questions/44650888/resize-an-image-without-distortion-opencv
 def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
@@ -124,7 +87,14 @@ def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
         r = width / float(w)
         dim = (width, int(h * r))
     # resize the image
-    return cv2.resize(image, dim, interpolation = inter)    
+    return cv2.resize(image, dim, interpolation = inter)
+
+def predict_race(face_img):
+    races = ['Asian', 'Indian', 'Black', 'White', 'Middle Eastern', 'Latino_Hispanic']
+    img = np.asarray(Image.fromarray(face_img).resize((224, 224)))
+    img = np.expand_dims(img, 0)
+    out = race_net(img)
+    return races[np.argmax(out)]
 
 def predict_gender(face_img):
     """
@@ -172,20 +142,15 @@ def predict_age(face_img):
 model = YoloDetector(target_size=720, gpu=1, min_face=90)
 
 
-def run_on_frame(db, frame, video_name, frameid, df, timestamp):
+def run_on_frame(frame, video_name, frameid, df, timestamp):
     orgimg = frame
     bboxes, _ = model(orgimg)
     # print(f"bboxes are {bboxes}, locations are {locations}")
     # print(f"original image shape is {orgimg.shape}, \n bboxes are {bboxes}")
-    JUST_SAVE_BOUNDING_BOXES = True
+    JUST_SAVE_BOUNDING_BOXES = False
     MAX_DISTANCE = 100
     img_path = 'just_yolo_frames/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid)
     pp, name = None, ""
-    # the face_recognitino library uses keys and values of your database separately
-    known_face_image_files = list(db.database.values())
-    # print('known_face_image_files ', known_face_image_files)
-    known_face_names = list(db.database.keys())
-    print(f"known_face_names {known_face_names}")
 
     # iterate through all the faces
     for bbox in bboxes[0]:
@@ -199,47 +164,30 @@ def run_on_frame(db, frame, video_name, frameid, df, timestamp):
         # keep in mind index become reversed during cropping
         face = orgimg[y1:y2, x1:x2].copy()
         
-        img0 = preprocess_siamese(face)
-        if len(known_face_image_files)<1:
-            known_face_image_files.append(img_path)
-            known_face_names.append(os.path.splitext(os.path.basename(img_path))[0])
-            db.insert(img_path, face)
-            cv2.imwrite('./just_yolo_frames/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid), face)
-        for i, img1_filename in enumerate(known_face_image_files):
-            img1 = preprocess_siamese(np.asarray(Image.open(img1_filename)))
-            output1, output2 = siamese_model(img0, img1)
-            # output1 = round(float(output1), 2)
-            # output2 = round(float(output2), 2)
-            distance = F.pairwise_distance(output1, output2)[0]
-            print(f"distanbce is {distance}")
-            if distance < 1.7:
-                name = known_face_names[i]
-                break
-            else:
-                name = None
-                db.insert(img_path, face)
-                
         pp  = paint_detected_face_on_image(orgimg, bbox, name)
         if pp is not None:
             print('just_yolo_frames/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid))
             cv2.imwrite('./just_yolo_frames/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid), face)
-            cv2.imwrite('./just_yolo_frames2/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid), orgimg)
         print(f"name is {name}")
-        df.loc[len(df)] = [frameid, round(timestamp, 2), bbox, img_path, name]
 
         if not JUST_SAVE_BOUNDING_BOXES:
-            custom_plot(face)
+            # custom_plot(face)
             # apply gender prediction
             gender_label = predict_gender(face)
             # apply age prediction
             age_label = predict_age(face)
-            labeltext = f"Person  {gender_label} \n {age_label}"
+            # apply race prediction
+            race_label = predict_race(face)
+
+            labeltext = f"Person  {gender_label} \n {age_label} \n {race_label}"
             y0, dy = y2+20, 22
             # The loop below is to put text one below other, we cannot use \n directly| change y0 and dy as per your screen size
             for i, line in enumerate(labeltext.split('\n')):
                 y = y0 + i*dy
                 cv2.putText(orgimg, line, (x1+10, y), 1, 1.8, (0,255,0))
-
+            
+            cv2.imwrite('./just_yolo_frames2/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid), orgimg)
+            df.loc[len(df)] = [frameid, round(timestamp, 2), bbox, img_path, name, gender_label, age_label, race_label]
             # custom_plot(orgimg)
 
 def run_on_video(video_name, df):
@@ -249,9 +197,6 @@ def run_on_video(video_name, df):
 
     SAVE_PATH = 'just_yolo_frames/{0}'.format(os.path.splitext(video_name)[0])
     SAVE_PATH2 = 'just_yolo_frames2/{0}'.format(os.path.splitext(video_name)[0])
-
-    db = Database(IMAGES_PATH)
-
 
     # create save path if doesn't exist
     if not os.path.exists(SAVE_PATH):
@@ -263,7 +208,7 @@ def run_on_video(video_name, df):
         ret, frame = cap.read()
         timestamp = cap.get(cv2.CAP_PROP_POS_MSEC)
         if ret:
-            run_on_frame(db, frame, video_name, count, df, timestamp)
+            run_on_frame(frame, video_name, count, df, timestamp)
             # cv2.imwrite('just_yolo_frames/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], count), frame)
             count += FRAME_SKIP # i.e. at 10 fps, this advances one second
             cap.set(cv2.CAP_PROP_POS_FRAMES, count)
@@ -274,10 +219,10 @@ def run_on_video(video_name, df):
 
 # path for initial images in the databases, images here should be unique
 IMAGES_PATH = '/mnt/hdd2/gender_detect/unique'
-df = pd.DataFrame(columns = ["frameid", "timestamp", "bbloc", "img_path", "name"])
+df = pd.DataFrame(columns = ["frameid", "timestamp", "bbloc", "img_path", "name", "gender", "age", "race"])
 
 # videos_list = ['19288/1524962.mp4']
-videos_list = glob.glob('19288/*.mp4')[0:20]
+videos_list = glob.glob('19288/*.mp4')[0:100]
 print(videos_list)
 for video in videos_list:
     run_on_video(video, df)

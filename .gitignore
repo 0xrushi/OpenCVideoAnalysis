@@ -11,3 +11,4 @@ just_yolo_frames2/*
 face.evoLVe/disp/*
 PyVGGFace/*.png
 PyVGGFace/models/*
+*.pyc
