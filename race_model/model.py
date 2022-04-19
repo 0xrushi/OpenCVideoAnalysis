@@ -2,6 +2,9 @@ import keras
 from keras.layers import Dense, Activation, Dropout, Flatten, Input, Convolution2D, ZeroPadding2D, MaxPooling2D, Activation
 from keras.layers import Conv2D, AveragePooling2D
 from keras.models import Model, Sequential
+import sys
+sys.path.append("..")
+from outerutils.constants import ROOT_FOLDER
 
 def get_race_model():
     model = Sequential()
@@ -58,5 +61,5 @@ def get_race_model():
 
     race_model = Model(inputs=model.input, outputs=base_model_output)
 
-    race_model.load_weights('/mnt/hdd2/gender_detect/weights/race_model_single_batch.h5')
+    race_model.load_weights(f'{ROOT_FOLDER}/weights/race_model_single_batch.h5')
     return race_model
