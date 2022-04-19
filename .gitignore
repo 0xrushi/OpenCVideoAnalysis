@@ -12,3 +12,9 @@ face.evoLVe/disp/*
 PyVGGFace/*.png
 PyVGGFace/models/*
 *.pyc
+awsstuff/*
+192copy/*
+arcface/mtcnn-model/*
+mtcnn-model/*
+resnet100.onnx
+player*.jpg

@@ -35,7 +35,7 @@ class YoloDetector:
             self.frontal = frontal
             if self.frontal:
                 self.anti_profile = joblib.load(os.path.join(self._class_path, 'models/anti_profile/anti_profile_xgb_new.pkl'))
-            self.detector = self.init_detector(weights_name,config_name)
+            self.detector = self.init_detector(weights_name, config_name)
 
     def init_detector(self,weights_name,config_name):
         print(self.gpu)

@@ -1,3 +1,4 @@
+import imp
 import os
 from tkinter import Y
 import torch
@@ -13,10 +14,53 @@ from face_detector import YoloDetector
 
 import cv2
 import pandas as pd
-import face_recognition
 from PyVGGFace.lib import VGGFace
-from SiameseNet.model import SiameseNetwork, preprocess_siamese
 from race_model.model import get_race_model
+
+sys.path.insert(0, f'{ROOT_FOLDER}/arcface/')
+import arcface
+
+class Database:
+    def __init__(self, IMAGES_PATH=None):
+        self.database = {}
+        self.IMAGES_PATH = IMAGES_PATH
+        self.threshold = 0.1
+        for filename in glob.glob(os.path.join(IMAGES_PATH, '*.png')):
+            # load image
+            print(filename)
+
+            # use the name in the filename as the identity key
+            identity = os.path.splitext(os.path.basename(filename))[0]
+
+            # get the face encoding and link it to the identity
+            # encodings = self.get_face_embeddings_from_image(image_rgb)
+            
+            self.database[identity] = filename
+    
+    def insert(self, img_path, frame=None):
+        # get filename without pre path and extension
+        identity = os.path.splitext(os.path.basename(img_path))[0]
+        if frame is None:
+            frame = np.asarray(Image.open(img_path))
+        # get the face encoding and link it to the identity
+        # encodings = self.get_face_embeddings_from_image(frame)
+        self.database[identity] = img_path
+    def check_if_exists(self, new_image_path):
+        # returns true and image_name if image exists in the database
+        maxsim = 0
+        name = None
+        for key in self.database:
+            try:
+                print(f"trying inmages {self.database[key]}, {new_image_path}")
+                _, sim = arcface.inference(self.database[key], new_image_path)
+                if sim > maxsim and sim > self.threshold:
+                    maxsim = sim
+                    name = key
+            except Exception as e:
+                print(e)
+        return maxsim > 0, name
+    def get(self):
+        return self.database
 
 class VGFace:
     def __init__(self):
@@ -142,7 +186,7 @@ def predict_age(face_img):
 model = YoloDetector(target_size=720, gpu=0, min_face=90)
 
 
-def run_on_frame(frame, video_name, frameid, df, timestamp):
+def run_on_frame(frame, video_name, frameid, df, timestamp, db):
     orgimg = frame
     bboxes, _ = model(orgimg)
     # print(f"bboxes are {bboxes}, locations are {locations}")
@@ -166,8 +210,16 @@ def run_on_frame(frame, video_name, frameid, df, timestamp):
         
         pp  = paint_detected_face_on_image(orgimg, bbox, name)
         if pp is not None:
-            print('just_yolo_frames/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid))
-            cv2.imwrite('./just_yolo_frames/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid), face)
+            face_save_path = './just_yolo_frames/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid)
+            print(face_save_path)
+            cv2.imwrite(face_save_path, face)
+            exists, name_from_db = db.check_if_exists(face_save_path)
+            if not exists:
+                db.insert(face_save_path)
+                print("inserted in db ", face_save_path)
+            else:
+                name = name_from_db
+
         print(f"name is {name}")
 
         if not JUST_SAVE_BOUNDING_BOXES:
@@ -179,7 +231,7 @@ def run_on_frame(frame, video_name, frameid, df, timestamp):
             # apply race prediction
             race_label = predict_race(face)
 
-            labeltext = f"Person  {gender_label} \n {age_label} \n {race_label}"
+            labeltext = f"Person  {gender_label} \n {age_label} \n {race_label} \n {name}"
             y0, dy = y2+20, 22
             # The loop below is to put text one below other, we cannot use \n directly| change y0 and dy as per your screen size
             for i, line in enumerate(labeltext.split('\n')):
@@ -198,6 +250,8 @@ def run_on_video(video_name, df):
     SAVE_PATH = 'just_yolo_frames/{0}'.format(os.path.splitext(video_name)[0])
     SAVE_PATH2 = 'just_yolo_frames2/{0}'.format(os.path.splitext(video_name)[0])
 
+    db = Database(IMAGES_PATH)
+
     # create save path if doesn't exist
     if not os.path.exists(SAVE_PATH):
         os.makedirs(SAVE_PATH)
@@ -208,7 +262,7 @@ def run_on_video(video_name, df):
         ret, frame = cap.read()
         timestamp = cap.get(cv2.CAP_PROP_POS_MSEC)
         if ret:
-            run_on_frame(frame, video_name, count, df, timestamp)
+            run_on_frame(frame, video_name, count, df, timestamp, db)
             # cv2.imwrite('just_yolo_frames/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], count), frame)
             count += FRAME_SKIP # i.e. at 10 fps, this advances one second
             cap.set(cv2.CAP_PROP_POS_FRAMES, count)
@@ -222,7 +276,9 @@ IMAGES_PATH = '/mnt/hdd2/gender_detect/unique'
 df = pd.DataFrame(columns = ["frameid", "timestamp", "bbloc", "img_path", "name", "gender", "age", "race"])
 
 # videos_list = ['19288/1524962.mp4']
-videos_list = glob.glob('19288/*.mp4')[0:100]
+# videos_list = glob.glob('19288/*.mp4')[0:100]
+# videos_list = glob.glob('19288/1524935.mp4')
+videos_list = glob.glob('19288/1575178.mp4')
 print(videos_list)
 for video in videos_list:
     run_on_video(video, df)
