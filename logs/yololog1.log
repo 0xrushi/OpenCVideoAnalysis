@@ -1,0 +1,80 @@
+04/22/2022 07:21:36 PM test stu
+04/22/2022 07:26:37 PM test stu
+04/22/2022 07:26:37 PM Processing video 19288/3085039.mp4
+04/22/2022 07:26:37 PM Processing frame 0 from video 19288/3085039.mp4 
+04/22/2022 07:26:37 PM Processing frame 5 from video 19288/3085039.mp4 
+04/22/2022 07:26:37 PM Processing frame 10 from video 19288/3085039.mp4 
+04/22/2022 07:26:37 PM Processing frame 15 from video 19288/3085039.mp4 
+04/22/2022 07:26:37 PM Processing frame 20 from video 19288/3085039.mp4 
+04/22/2022 07:26:37 PM Processing frame 25 from video 19288/3085039.mp4 
+04/22/2022 07:26:37 PM Processing frame 30 from video 19288/3085039.mp4 
+04/22/2022 07:26:37 PM Processing frame 35 from video 19288/3085039.mp4 
+04/22/2022 07:26:38 PM Processing frame 40 from video 19288/3085039.mp4 
+04/22/2022 07:26:38 PM Processing frame 45 from video 19288/3085039.mp4 
+04/22/2022 07:26:38 PM Processing frame 50 from video 19288/3085039.mp4 
+04/22/2022 07:26:38 PM Processing frame 55 from video 19288/3085039.mp4 
+04/22/2022 07:26:38 PM Valid face found, saving face at ./just_yolo_frames/19288/3085039/frame55.jpg
+04/22/2022 07:26:38 PM Face at ./just_yolo_frames/19288/3085039/frame55.jpg not found in DB, adding...
+04/22/2022 07:26:40 PM Processing frame 60 from video 19288/3085039.mp4 
+04/22/2022 07:26:40 PM Valid face found, saving face at ./just_yolo_frames/19288/3085039/frame60.jpg
+04/22/2022 07:26:40 PM Face at ./just_yolo_frames/19288/3085039/frame60.jpg not found in DB, adding...
+04/22/2022 07:26:40 PM Valid face found, saving face at ./just_yolo_frames/19288/3085039/frame60.jpg
+04/22/2022 07:26:40 PM Face at ./just_yolo_frames/19288/3085039/frame60.jpg not found in DB, adding...
+04/22/2022 07:26:40 PM Processing frame 65 from video 19288/3085039.mp4 
+04/22/2022 07:26:40 PM Valid face found, saving face at ./just_yolo_frames/19288/3085039/frame65.jpg
+04/22/2022 07:26:40 PM Face at ./just_yolo_frames/19288/3085039/frame65.jpg not found in DB, adding...
+04/22/2022 07:26:40 PM Processing frame 70 from video 19288/3085039.mp4 
+04/22/2022 07:26:40 PM Valid face found, saving face at ./just_yolo_frames/19288/3085039/frame70.jpg
+04/22/2022 07:26:40 PM Face at ./just_yolo_frames/19288/3085039/frame70.jpg not found in DB, adding...
+04/22/2022 07:26:41 PM Processing frame 75 from video 19288/3085039.mp4 
+04/22/2022 07:26:41 PM Processing frame 80 from video 19288/3085039.mp4 
+04/22/2022 07:26:41 PM Processing frame 85 from video 19288/3085039.mp4 
+04/22/2022 07:26:41 PM Processing frame 90 from video 19288/3085039.mp4 
+04/22/2022 07:26:41 PM Processing frame 95 from video 19288/3085039.mp4 
+04/22/2022 07:26:41 PM Processing frame 100 from video 19288/3085039.mp4 
+04/22/2022 07:26:41 PM Processing frame 105 from video 19288/3085039.mp4 
+04/22/2022 07:26:41 PM Processing frame 110 from video 19288/3085039.mp4 
+04/22/2022 07:26:41 PM Processing frame 115 from video 19288/3085039.mp4 
+04/22/2022 07:26:41 PM Processing frame 120 from video 19288/3085039.mp4 
+04/22/2022 07:26:41 PM Processing frame 125 from video 19288/3085039.mp4 
+04/22/2022 07:26:41 PM Processing frame 130 from video 19288/3085039.mp4 
+04/22/2022 07:26:41 PM Valid face found, saving face at ./just_yolo_frames/19288/3085039/frame130.jpg
+04/22/2022 07:26:42 PM Processing frame 135 from video 19288/3085039.mp4 
+04/22/2022 07:26:42 PM Valid face found, saving face at ./just_yolo_frames/19288/3085039/frame135.jpg
+04/22/2022 07:26:42 PM Processing frame 140 from video 19288/3085039.mp4 
+04/22/2022 07:26:42 PM Valid face found, saving face at ./just_yolo_frames/19288/3085039/frame140.jpg
+04/22/2022 07:26:43 PM Processing frame 145 from video 19288/3085039.mp4 
+04/22/2022 07:26:43 PM Valid face found, saving face at ./just_yolo_frames/19288/3085039/frame145.jpg
+04/22/2022 07:26:43 PM Processing frame 150 from video 19288/3085039.mp4 
+04/22/2022 07:26:43 PM Valid face found, saving face at ./just_yolo_frames/19288/3085039/frame150.jpg
+04/22/2022 07:26:44 PM Face at ./just_yolo_frames/19288/3085039/frame150.jpg not found in DB, adding...
+04/22/2022 07:26:44 PM Processing frame 155 from video 19288/3085039.mp4 
+04/22/2022 07:26:44 PM Valid face found, saving face at ./just_yolo_frames/19288/3085039/frame155.jpg
+04/22/2022 07:26:44 PM Processing frame 160 from video 19288/3085039.mp4 
+04/22/2022 07:26:44 PM Valid face found, saving face at ./just_yolo_frames/19288/3085039/frame160.jpg
+04/22/2022 07:26:45 PM Processing frame 165 from video 19288/3085039.mp4 
+04/22/2022 07:26:45 PM Processing frame 170 from video 19288/3085039.mp4 
+04/22/2022 07:26:45 PM Processing frame 175 from video 19288/3085039.mp4 
+04/22/2022 07:26:45 PM Processing frame 180 from video 19288/3085039.mp4 
+04/22/2022 07:26:45 PM Processing frame 185 from video 19288/3085039.mp4 
+04/22/2022 07:26:45 PM Processing frame 190 from video 19288/3085039.mp4 
+04/22/2022 07:26:45 PM Processing frame 195 from video 19288/3085039.mp4 
+04/22/2022 07:26:45 PM Valid face found, saving face at ./just_yolo_frames/19288/3085039/frame195.jpg
+04/22/2022 07:26:45 PM Face at ./just_yolo_frames/19288/3085039/frame195.jpg not found in DB, adding...
+04/22/2022 07:26:46 PM Processing frame 200 from video 19288/3085039.mp4 
+04/22/2022 07:26:46 PM Processing frame 205 from video 19288/3085039.mp4 
+04/22/2022 07:26:46 PM Processing frame 210 from video 19288/3085039.mp4 
+04/22/2022 07:26:46 PM Processing frame 215 from video 19288/3085039.mp4 
+04/22/2022 07:26:46 PM Processing frame 220 from video 19288/3085039.mp4 
+04/22/2022 07:26:46 PM Valid face found, saving face at ./just_yolo_frames/19288/3085039/frame220.jpg
+04/22/2022 07:26:46 PM Processing frame 225 from video 19288/3085039.mp4 
+04/22/2022 07:26:46 PM Valid face found, saving face at ./just_yolo_frames/19288/3085039/frame225.jpg
+04/22/2022 07:26:47 PM Face at ./just_yolo_frames/19288/3085039/frame225.jpg not found in DB, adding...
+04/22/2022 07:26:47 PM Processing frame 230 from video 19288/3085039.mp4 
+04/22/2022 07:26:47 PM Valid face found, saving face at ./just_yolo_frames/19288/3085039/frame230.jpg
+04/22/2022 07:26:47 PM Face at ./just_yolo_frames/19288/3085039/frame230.jpg not found in DB, adding...
+04/22/2022 07:26:47 PM Processing frame 235 from video 19288/3085039.mp4 
+04/22/2022 07:26:47 PM Valid face found, saving face at ./just_yolo_frames/19288/3085039/frame235.jpg
+04/22/2022 07:26:48 PM Face at ./just_yolo_frames/19288/3085039/frame235.jpg not found in DB, adding...
+04/22/2022 07:26:48 PM Processing frame 240 from video 19288/3085039.mp4 
+04/22/2022 07:26:48 PM Valid face found, saving face at ./just_yolo_frames/19288/3085039/frame240.jpg

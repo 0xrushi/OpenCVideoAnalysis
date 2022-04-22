@@ -10,16 +10,16 @@ from PIL import Image
 import glob
 from outerutils.constants import *
 import sys
-sys.path.insert(0, f'{ROOT_FOLDER}/main_models/yoloface/')
+sys.path.insert(0, f'{ROOT_FOLDER}/yoloface/')
 from face_detector import YoloDetector
 
 import cv2
 import pandas as pd
-from main_models.PyVGGFace.lib import VGGFace
-from main_models.race_model.model import get_race_model
+from PyVGGFace.lib import VGGFace
+from race_model.model import get_race_model
 
 sys.path.insert(0, f'{ROOT_FOLDER}/arcface/')
-import main_models.arcface as arcface
+import arcface
 
 class Database:
     def __init__(self, IMAGES_PATH=None):
@@ -230,8 +230,8 @@ def run_on_video(video_name, df):
     count = 0
     FRAME_SKIP = 5
 
-    SAVE_PATH = 'output/just_yolo_frames/{0}'.format(os.path.splitext(video_name)[0])
-    SAVE_PATH2 = 'output/just_yolo_frames2/{0}'.format(os.path.splitext(video_name)[0])
+    SAVE_PATH = 'just_yolo_frames/{0}'.format(os.path.splitext(video_name)[0])
+    SAVE_PATH2 = 'just_yolo_frames2/{0}'.format(os.path.splitext(video_name)[0])
 
     db = Database(IMAGES_PATH)
 
@@ -263,7 +263,7 @@ if __name__ == '__main__':
     format='%(asctime)s %(message)s', 
     datefmt='%m/%d/%Y %I:%M:%S %p',
     handlers=[
-        logging2.FileHandler("logs/yololog1.log"),
+        logging2.FileHandler("yololog1.log"),
         logging2.StreamHandler()
     ], force=True)
     logger = logging2.getLogger("server_log")
