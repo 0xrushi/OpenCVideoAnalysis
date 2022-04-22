@@ -1,4 +1,6 @@
 import imp
+import logging
+import argparse
 import os
 from tkinter import Y
 import torch
@@ -27,24 +29,20 @@ class Database:
         self.threshold = 0.1
         for filename in glob.glob(os.path.join(IMAGES_PATH, '*.png')):
             # load image
-            print(filename)
+            # print(filename)
 
             # use the name in the filename as the identity key
             identity = os.path.splitext(os.path.basename(filename))[0]
 
-            # get the face encoding and link it to the identity
-            # encodings = self.get_face_embeddings_from_image(image_rgb)
-            
             self.database[identity] = filename
     
     def insert(self, img_path, frame=None):
-        # get filename without pre path and extension
+        # get filename without previous path and extension
         identity = os.path.splitext(os.path.basename(img_path))[0]
         if frame is None:
             frame = np.asarray(Image.open(img_path))
-        # get the face encoding and link it to the identity
-        # encodings = self.get_face_embeddings_from_image(frame)
         self.database[identity] = img_path
+
     def check_if_exists(self, new_image_path):
         # returns true and image_name if image exists in the database
         maxsim = 0
@@ -61,21 +59,6 @@ class Database:
         return maxsim > 0, name
     def get(self):
         return self.database
-
-class VGFace:
-    def __init__(self):
-        self.model = VGGFace().double()
-        model_dict = torch.load('weights/vggface.pth', map_location=lambda storage, loc: storage)
-        self.model.load_state_dict(model_dict)
-    def load_img(self, image_arr):
-        # img = cv2.imread(img_path)
-        img = cv2.resize(image_arr, (224, 224))
-        img = torch.Tensor(img).permute(2, 0, 1).view(1, 3, 224, 224).double()
-        img -= torch.Tensor(np.array([129.1863, 104.7624, 93.5940])).double().view(1, 3, 1, 1)
-        return img
-    def get_encoding(self, image_arr):
-        img = self.load_img(image_arr)
-        return self.model(img)
 
 def paint_detected_face_on_image(frame, location, name=None):
     """
@@ -99,8 +82,6 @@ def paint_detected_face_on_image(frame, location, name=None):
     cv2.putText(frame, name, (left + 6, bottom - 6), cv2.FONT_HERSHEY_DUPLEX, 1.0, (255, 255, 255), 1)
     return frame
 
-# load VFF face model
-vgg_face = VGFace()
 # Load gender prediction model
 gender_net = cv2.dnn.readNetFromCaffe(GENDER_MODEL, GENDER_PROTO)
 # Load age prediction model
@@ -191,8 +172,8 @@ def run_on_frame(frame, video_name, frameid, df, timestamp, db):
     bboxes, _ = model(orgimg)
     # print(f"bboxes are {bboxes}, locations are {locations}")
     # print(f"original image shape is {orgimg.shape}, \n bboxes are {bboxes}")
+    logging.debug('Processing frame %s from video %s ',frameid, video_name)
     JUST_SAVE_BOUNDING_BOXES = False
-    MAX_DISTANCE = 100
     img_path = 'just_yolo_frames/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid)
     pp, name = None, ""
 
@@ -211,10 +192,12 @@ def run_on_frame(frame, video_name, frameid, df, timestamp, db):
         pp  = paint_detected_face_on_image(orgimg, bbox, name)
         if pp is not None:
             face_save_path = './just_yolo_frames/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid)
-            print(face_save_path)
+            logging.debug('Valid face found, saving face at %s', face_save_path)
+            # print(face_save_path)
             cv2.imwrite(face_save_path, face)
             exists, name_from_db = db.check_if_exists(face_save_path)
             if not exists:
+                logging.debug('Face at %s not found in DB, adding...', face_save_path)
                 db.insert(face_save_path)
                 print("inserted in db ", face_save_path)
             else:
@@ -237,12 +220,13 @@ def run_on_frame(frame, video_name, frameid, df, timestamp, db):
             for i, line in enumerate(labeltext.split('\n')):
                 y = y0 + i*dy
                 cv2.putText(orgimg, line, (x1+10, y), 1, 1.8, (0,255,0))
-            
+            logging.debug('Saving gender, age,race %s', './just_yolo_frames2/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid), orgimg)
             cv2.imwrite('./just_yolo_frames2/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid), orgimg)
             df.loc[len(df)] = [frameid, round(timestamp, 2), bbox, img_path, name, gender_label, age_label, race_label]
             # custom_plot(orgimg)
 
 def run_on_video(video_name, df):
+    logging.debug('Processing video %s', video_name)
     cap = cv2.VideoCapture(video_name)
     count = 0
     FRAME_SKIP = 5
@@ -271,14 +255,30 @@ def run_on_video(video_name, df):
             df.to_csv(f"{SAVE_PATH}/export.csv", index=False)
             break
 
-# path for initial images in the databases, images here should be unique
-IMAGES_PATH = '/mnt/hdd2/gender_detect/unique'
-df = pd.DataFrame(columns = ["frameid", "timestamp", "bbloc", "img_path", "name", "gender", "age", "race"])
 
-# videos_list = ['19288/1524962.mp4']
-# videos_list = glob.glob('19288/*.mp4')[0:100]
-# videos_list = glob.glob('19288/1524935.mp4')
-videos_list = glob.glob('19288/1575178.mp4')
-print(videos_list)
-for video in videos_list:
-    run_on_video(video, df)
+
+if __name__ == '__main__':
+# path for initial images in the databases, images here should be unique
+    IMAGES_PATH = f'{ROOT_FOLDER}/unique'
+    df = pd.DataFrame(columns = ["frameid", "timestamp", "bbloc", "img_path", "name", "gender", "age", "race"])
+
+    # videos_list = ['19288/1524962.mp4']
+    videos_list = glob.glob('19288/*.mp4')[0:100]
+    # videos_list = glob.glob('19288/1524935.mp4')
+    # videos_list = glob.glob('19288/1575178.mp4')
+    videos_list = np.array_split(videos_list, 12)
+    # Create the parser
+    parser = argparse.ArgumentParser()
+    # Add an argument
+    parser.add_argument('--index', type=int, required=True)
+
+    args = parser.parse_args()
+
+    logging.basicConfig(filename=f'yololog{args.index}.log', encoding='utf-8', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
+    videos_list = videos_list[args.index]
+
+    print(videos_list)
+    # Process each video
+    for video in videos_list:
+        run_on_video(video, df)
