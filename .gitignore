@@ -17,3 +17,4 @@ main_models/arcface/mtcnn-model/*
 main_models/mtcnn-model/*
 resnet100.onnx
 player*.jpg
+scripts/mtcnn-model

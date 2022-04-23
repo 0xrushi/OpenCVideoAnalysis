@@ -7,8 +7,6 @@ import sys
 import numpy as np
 import mxnet as mx
 import os
-
-
 from scipy import misc
 import random
 import sklearn

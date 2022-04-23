@@ -9,18 +9,21 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import glob
 import sys
-sys.path.insert(0, '../')
+sys.path.insert(0, '/mnt/hdd2/gender_detect')
 from outerutils.constants import *
 sys.path.insert(0, f'{ROOT_FOLDER}/main_models/yoloface/')
 from face_detector import YoloDetector
 
 import cv2
 import pandas as pd
-from main_models.PyVGGFace.lib import VGGFace
+# from main_models.PyVGGFace.lib import VGGFace
 from main_models.race_model.model import get_race_model
 
-sys.path.insert(0, f'{ROOT_FOLDER}/arcface/')
-import main_models.arcface as arcface
+sys.path.insert(0, f'{ROOT_FOLDER}/main_models/arcface/')
+from main_models.arcface import arcface
+
+os.chdir(ROOT_FOLDER)
+
 
 class Database:
     def __init__(self, IMAGES_PATH=None):
@@ -174,7 +177,7 @@ def run_on_frame(frame, video_name, frameid, df, timestamp, db):
     # print(f"original image shape is {orgimg.shape}, \n bboxes are {bboxes}")
     logger.debug('Processing frame %s from video %s ',frameid, video_name)
     JUST_SAVE_BOUNDING_BOXES = False
-    img_path = 'just_yolo_frames/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid)
+    img_path = 'output/just_yolo_frames/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid)
     pp, name = None, ""
 
     # iterate through all the faces
@@ -191,7 +194,7 @@ def run_on_frame(frame, video_name, frameid, df, timestamp, db):
         
         pp  = paint_detected_face_on_image(orgimg, bbox, name)
         if pp is not None:
-            face_save_path = './just_yolo_frames/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid)
+            face_save_path = 'output/just_yolo_frames/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid)
             logger.debug('Valid face found, saving face at %s', face_save_path)
             # print(face_save_path)
             cv2.imwrite(face_save_path, face)
@@ -220,8 +223,8 @@ def run_on_frame(frame, video_name, frameid, df, timestamp, db):
             for i, line in enumerate(labeltext.split('\n')):
                 y = y0 + i*dy
                 cv2.putText(orgimg, line, (x1+10, y), 1, 1.8, (0,255,0))
-            logger.debug('Saving gender, age,race %s', './just_yolo_frames2/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid), orgimg)
-            cv2.imwrite('./just_yolo_frames2/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid), orgimg)
+            logger.debug('Saving gender, age,race %s', 'output/just_yolo_frames2/{0}/frame{1}.jpg'.format(os.path.splitext(os.path.basename(video_name))[0], frameid), orgimg)
+            cv2.imwrite('output/just_yolo_frames2/{0}/frame{1}.jpg'.format(os.path.splitext(os.path.basename(video_name))[0], frameid), orgimg)
             df.loc[len(df)] = [frameid, round(timestamp, 2), bbox, img_path, name, gender_label, age_label, race_label]
             # custom_plot(orgimg)
 
@@ -264,7 +267,7 @@ if __name__ == '__main__':
     format='%(asctime)s %(message)s', 
     datefmt='%m/%d/%Y %I:%M:%S %p',
     handlers=[
-        logging2.FileHandler("../logs/yololog1.log"),
+        logging2.FileHandler("logs/yololog1.log"),
         logging2.StreamHandler()
     ], force=True)
     logger = logging2.getLogger("server_log")
@@ -275,7 +278,7 @@ if __name__ == '__main__':
     df = pd.DataFrame(columns = ["frameid", "timestamp", "bbloc", "img_path", "name", "gender", "age", "race"])
 
     # videos_list = ['19288/1524962.mp4']
-    videos_list = glob.glob('19288/*.mp4')[0:100]
+    videos_list = glob.glob('data/19288/*.mp4')[0:100]
     # videos_list = glob.glob('19288/1524935.mp4')
     # videos_list = glob.glob('19288/1575178.mp4')
     videos_list = np.array_split(videos_list, 12)
