@@ -22,6 +22,8 @@ from main_models.race_model.model import get_race_model
 sys.path.insert(0, f'{ROOT_FOLDER}/main_models/arcface/')
 from main_models.arcface import arcface
 
+from transformers import ViTFeatureExtractor, ViTForImageClassification
+
 os.chdir(ROOT_FOLDER)
 
 
@@ -88,7 +90,10 @@ def paint_detected_face_on_image(frame, location, name=None):
 # Load gender prediction model
 gender_net = cv2.dnn.readNetFromCaffe(GENDER_MODEL, GENDER_PROTO)
 # Load age prediction model
-age_net = cv2.dnn.readNetFromCaffe(AGE_MODEL, AGE_PROTO)
+# age_net = cv2.dnn.readNetFromCaffe(AGE_MODEL, AGE_PROTO)
+# Init model, transforms
+age_net = model = ViTForImageClassification.from_pretrained('nateraw/vit-age-classifier')
+age_transforms = ViTFeatureExtractor.from_pretrained('nateraw/vit-age-classifier')
 # load race model
 race_net  = get_race_model()
 
@@ -154,18 +159,43 @@ def predict_age(face_img):
     Input: face_img, numpy array
     Return: gender label
     """
-    blob = cv2.dnn.blobFromImage(
-        image=face_img, scalefactor=1.0, size=(227, 227),
-        mean=MODEL_MEAN_VALUES, swapRB=False
-    )
-    age_net.setInput(blob)
-    age_preds =  age_net.forward()
-    i = age_preds[0].argmax()
-    age = AGE_INTERVALS[i]
-    age_confidence_score = age_preds[0][i]
+    labels = {0:"0-2", 1: "3-9" , 2: "10-19", 3: "20-29", 4: "30-39", 5: "40-49", 6: "50-59", 7:"60-69",8:"more than 70"} 
+    # Transform our image and pass it through the model
+    inputs = age_transforms(face_img, return_tensors='pt')
+    output = age_net(**inputs)
+
+    # Predicted Class probabilities
+    proba = output.logits.softmax(1)
+
+    # Predicted Classes
+    preds = proba.argmax(1)
+
+    values, indices = torch.topk(proba, k=1)
+
+    preds, age_confidence_score = list({labels[i.item()]: v.item() for i, v in zip(indices.numpy()[0], values.detach().numpy()[0])}.items())[0]
+
     # Draw the box
-    label = f"Age: {age}-{age_confidence_score*100:.1f}%"
+    label = f"Age: {preds}-{age_confidence_score*100:.1f}%"
     return label
+
+# def predict_age(face_img):
+#     """
+#     Predict the age of the face shown in the image
+#     Input: face_img, numpy array
+#     Return: gender label
+#     """
+#     blob = cv2.dnn.blobFromImage(
+#         image=face_img, scalefactor=1.0, size=(227, 227),
+#         mean=MODEL_MEAN_VALUES, swapRB=False
+#     )
+#     age_net.setInput(blob)
+#     age_preds =  age_net.forward()
+#     i = age_preds[0].argmax()
+#     age = AGE_INTERVALS[i]
+#     age_confidence_score = age_preds[0][i]
+#     # Draw the box
+#     label = f"Age: {age}-{age_confidence_score*100:.1f}%"
+#     return label
 
 model = YoloDetector(target_size=720, gpu=0, min_face=90)
 
