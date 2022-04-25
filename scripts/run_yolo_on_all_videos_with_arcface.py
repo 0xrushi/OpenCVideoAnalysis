@@ -195,6 +195,8 @@ def run_on_frame(frame, video_name, frameid, df, timestamp, db):
         pp  = paint_detected_face_on_image(orgimg, bbox, name)
         if pp is not None:
             face_save_path = 'output/just_yolo_frames/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid)
+            face_save_path2 = 'output/just_yolo_frames/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid)
+
             logger.debug('Valid face found, saving face at %s', face_save_path)
             # print(face_save_path)
             cv2.imwrite(face_save_path, face)
@@ -223,8 +225,8 @@ def run_on_frame(frame, video_name, frameid, df, timestamp, db):
             for i, line in enumerate(labeltext.split('\n')):
                 y = y0 + i*dy
                 cv2.putText(orgimg, line, (x1+10, y), 1, 1.8, (0,255,0))
-            logger.debug('Saving gender, age,race %s', 'output/just_yolo_frames2/{0}/frame{1}.jpg'.format(os.path.splitext(os.path.basename(video_name))[0], frameid), orgimg)
-            cv2.imwrite('output/just_yolo_frames2/{0}/frame{1}.jpg'.format(os.path.splitext(os.path.basename(video_name))[0], frameid), orgimg)
+            logger.debug('Saving gender, age,race %s', 'output/just_yolo_frames2/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid))
+            cv2.imwrite('output/just_yolo_frames2/{0}/frame{1}.jpg'.format(os.path.splitext(video_name)[0], frameid), orgimg)
             df.loc[len(df)] = [frameid, round(timestamp, 2), bbox, img_path, name, gender_label, age_label, race_label]
             # custom_plot(orgimg)
 
@@ -236,6 +238,10 @@ def run_on_video(video_name, df):
 
     SAVE_PATH = 'output/just_yolo_frames/{0}'.format(os.path.splitext(video_name)[0])
     SAVE_PATH2 = 'output/just_yolo_frames2/{0}'.format(os.path.splitext(video_name)[0])
+
+    print(SAVE_PATH, SAVE_PATH2)
+
+    # raise SystemExit('lavda')
 
     db = Database(IMAGES_PATH)
 
@@ -261,27 +267,18 @@ def run_on_video(video_name, df):
 
 
 if __name__ == '__main__':
-    logging2.basicConfig(
-    # filename=f'yololog1.log',
-    level=logging2.DEBUG, 
-    format='%(asctime)s %(message)s', 
-    datefmt='%m/%d/%Y %I:%M:%S %p',
-    handlers=[
-        logging2.FileHandler("logs/yololog1.log"),
-        logging2.StreamHandler()
-    ], force=True)
-    logger = logging2.getLogger("server_log")
-    logger.debug("test stu")
-    print("tesdt stuffui")
-# path for initial images in the databases, images here should be unique
+    # path for initial images in the databases, images here should be unique
     IMAGES_PATH = f'{ROOT_FOLDER}/unique'
-    df = pd.DataFrame(columns = ["frameid", "timestamp", "bbloc", "img_path", "name", "gender", "age", "race"])
 
     # videos_list = ['19288/1524962.mp4']
-    videos_list = glob.glob('data/19288/*.mp4')[0:100]
+    # videos_list = glob.glob('data/19288/*.mp4')[0:100]
+    videos_list = glob.glob('data/lebron/*.mp4')
     # videos_list = glob.glob('19288/1524935.mp4')
     # videos_list = glob.glob('19288/1575178.mp4')
-    videos_list = np.array_split(videos_list, 12)
+
+
+    # videos_list = np.array_split(videos_list, 12)
+    print("videos list ", videos_list)
     # Create the parser
     parser = argparse.ArgumentParser()
     # Add an argument
@@ -289,9 +286,21 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    videos_list = videos_list[args.index]
+    # videos_list = videos_list[args.index]
+    
+    logging2.basicConfig(
+    # filename=f'yololog1.log',
+    level=logging2.DEBUG, 
+    format='%(asctime)s %(message)s', 
+    datefmt='%m/%d/%Y %I:%M:%S %p',
+    handlers=[
+        logging2.FileHandler(f"logs/yololog{args.index}.log"),
+        logging2.StreamHandler()
+    ], force=True)
+    logger = logging2.getLogger("server_log")
 
     print(videos_list)
     # Process each video
     for video in videos_list:
+        df = pd.DataFrame(columns = ["frameid", "timestamp", "bbloc", "img_path", "name", "gender", "age", "race"])
         run_on_video(video, df)
