@@ -197,7 +197,7 @@ def predict_age(face_img):
 #     label = f"Age: {age}-{age_confidence_score*100:.1f}%"
 #     return label
 
-model = YoloDetector(target_size=720, gpu=0, min_face=90)
+model = YoloDetector(target_size=720, gpu=-1, min_face=90)
 
 
 def run_on_frame(frame, video_name, frameid, df, timestamp, db):
@@ -302,12 +302,12 @@ if __name__ == '__main__':
 
     # videos_list = ['19288/1524962.mp4']
     # videos_list = glob.glob('data/19288/*.mp4')[0:100]
-    videos_list = glob.glob('data/lebron/*.mp4')
+    videos_list = glob.glob('/mnt/hdd2/gender_detect/data/small_batch/*/*.mp4')
     # videos_list = glob.glob('19288/1524935.mp4')
     # videos_list = glob.glob('19288/1575178.mp4')
 
 
-    # videos_list = np.array_split(videos_list, 12)
+    videos_list = np.array_split(videos_list, 12)
     print("videos list ", videos_list)
     # Create the parser
     parser = argparse.ArgumentParser()
@@ -316,7 +316,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    # videos_list = videos_list[args.index]
+    videos_list = videos_list[args.index]
     
     logging2.basicConfig(
     # filename=f'yololog1.log',

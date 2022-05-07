@@ -1,27 +1,62 @@
+# Automate video analysis with deep learning
+
+This project is a free and open-source video analytics service that can be easily integrated into applications without prior deep learning knowledge. The service can seamlessly scale to process petabytes of data.
+
+## Features
+
+**Face compare and search**
+**Gender detection**
+**Age detection**
+**Video segment detection**
+
+**Customizable pretrained models for each function**
+**Flexible deployment**
+
+## Use cases
+
+**Smart home alerts**
+**Multimedia analysis**
+**Spatial analysis**
+
+
+#### Please refer to my article for more detailed analysis [A comparison of different Face Detection APIs in the industry](https://rushichaudhari.github.io/posts/2022-05-06-why-do-we-need-an-opensource-face-detection-apis/)
+
+---
+
+# How to run
 
 `virtualenv --python=/usr/bin/python3.8 ./python38venv`
 
 `source python38venv/bin/activate`
 
-To use YOLO
 `export PYTHONPATH="${PYTHONPATH}:/mnt/hdd2/gender_detect/yoloface/"`
 
-
+--- 
 ## Things using
+
+yoloface: https://github.com/sthanhng/yoloface
+vit transformers: https://huggingface.co/docs/transformers/model_doc/vit
+arcface
+
+## Things used before
+
 face_recognition: https://github.com/ageitgey/face_recognition
 face.evoLVe: https://github.com/ZhaoJ9014/face.evoLVe
+## Things failed (didn't work well with pretrained weights)
 
-## Things failed
+Insightface: https://github.com/deepinsight/insightface
 
 Deepface: https://github.com/serengil/deepface
+
 CompreFace: https://github.com/exadel-inc/CompreFace
-
+```
+# compreface
 curl -i -X POST -H "Content-Type: multipart/form-data" -F "file=@ /mnt/hdd2/gender_detect/1.png" -F "compareImage=@ /mnt/hdd2/gender_detect/3.png" http://127.0.0.1:8000/api/simface/
-
+```
 
 ## An example of model2_on_all_videos.py on 19288/1524962.mp4
 
-Conclusion:
+**Conclusion:**
 - Not all frames are processed eg. 0, 10, 40 but as the time delay is very less, we can still draw out some conclusions
 - After frameid 730 there are no bounding boxes detected, 730th frame = 730/30 seconds = 24 seconds, which is true in 19288/1524962.mp4 no person appears after 24 seconds
 - Frame530 has two entries, because there are two faces in the frame
