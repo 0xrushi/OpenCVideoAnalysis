@@ -275,9 +275,10 @@ def run_on_video(video_name, df):
 
 
 if __name__ == '__main__':
+    IMAGES_PATH = 'data/unique'
     # videos_list = ['19288/1524962.mp4']
     # videos_list = glob.glob('data/19288/*.mp4')[0:100]
-    videos_list = glob.glob('/mnt/hdd2/gender_detect/data/small_batch/*/*.mp4')
+    videos_list = glob.glob("/mnt/hdd2/gender_detect/data/utube/adidas.mp4")
     # videos_list = glob.glob('19288/1524935.mp4')
     # videos_list = glob.glob('19288/1575178.mp4')
 

@@ -23,6 +23,10 @@ This project is a free and open-source video analytics service that can be easil
 
 ---
 
+#### Example on [this](https://www.youtube.com/watch?v=fujboh-W7Sk) test video: 
+
+[![video](http://img.youtube.com/vi/HIvfQXwD81M/0.jpg)](http://www.youtube.com/watch?v=HIvfQXwD81M "OpenCV video analysis")
+
 # How to run
 
 `virtualenv --python=/usr/bin/python3.8 ./python38venv`
