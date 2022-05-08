@@ -91,11 +91,11 @@ def paint_detected_face_on_image(frame, location, name=None):
 gender_net = cv2.dnn.readNetFromCaffe(GENDER_MODEL, GENDER_PROTO)
 # Load age prediction model
 # age_net = cv2.dnn.readNetFromCaffe(AGE_MODEL, AGE_PROTO)
-# Init model, transforms
 age_net = model = ViTForImageClassification.from_pretrained('nateraw/vit-age-classifier')
 age_transforms = ViTFeatureExtractor.from_pretrained('nateraw/vit-age-classifier')
 # load race model
 race_net  = get_race_model()
+model = YoloDetector(target_size=720, gpu=-1, min_face=90)
 
 # from: https://stackoverflow.com/questions/44650888/resize-an-image-without-distortion-opencv
 def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
@@ -177,28 +177,6 @@ def predict_age(face_img):
     # Draw the box
     label = f"Age: {preds}-{age_confidence_score*100:.1f}%"
     return label
-
-# def predict_age(face_img):
-#     """
-#     Predict the age of the face shown in the image
-#     Input: face_img, numpy array
-#     Return: gender label
-#     """
-#     blob = cv2.dnn.blobFromImage(
-#         image=face_img, scalefactor=1.0, size=(227, 227),
-#         mean=MODEL_MEAN_VALUES, swapRB=False
-#     )
-#     age_net.setInput(blob)
-#     age_preds =  age_net.forward()
-#     i = age_preds[0].argmax()
-#     age = AGE_INTERVALS[i]
-#     age_confidence_score = age_preds[0][i]
-#     # Draw the box
-#     label = f"Age: {age}-{age_confidence_score*100:.1f}%"
-#     return label
-
-model = YoloDetector(target_size=720, gpu=-1, min_face=90)
-
 
 def run_on_frame(frame, video_name, frameid, df, timestamp, db):
     orgimg = frame
@@ -297,9 +275,6 @@ def run_on_video(video_name, df):
 
 
 if __name__ == '__main__':
-    # path for initial images in the databases, images here should be unique
-    IMAGES_PATH = f'{ROOT_FOLDER}/unique'
-
     # videos_list = ['19288/1524962.mp4']
     # videos_list = glob.glob('data/19288/*.mp4')[0:100]
     videos_list = glob.glob('/mnt/hdd2/gender_detect/data/small_batch/*/*.mp4')
