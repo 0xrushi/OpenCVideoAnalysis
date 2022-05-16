@@ -25,7 +25,7 @@ This project is a free and open-source video analytics service that can be easil
 
 #### Example on [this](https://www.youtube.com/watch?v=fujboh-W7Sk) test video: 
 
-[![video](http://img.youtube.com/vi/HIvfQXwD81M/0.jpg)](http://www.youtube.com/watch?v=HIvfQXwD81M "OpenCV video analysis")
+[![video](http://img.youtube.com/vi/HIvfQXwD81M/0.jpg)](https://player.odycdn.com/api/v4/streams/free/video-analysis-demo/94ea2e60fc973f4eea87abc7d0cc02fce4f88af1/71f58a "OpenCV video analysis")
 
 # How to run
 
